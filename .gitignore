@@ -1,0 +1,17 @@
+# Data files
+data/
+*.csv
+*.xlsx
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# VS Code
+.vscode/
