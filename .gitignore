@@ -14,4 +14,4 @@ __pycache__/
 *.ipynb_checkpoints
 
 # VS Code
-.vscode/
+.vscode/.DS_Store
