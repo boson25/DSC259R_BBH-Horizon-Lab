@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
-    <title>DSC259R BBH Horizon Lab: Recipe and Ratings</title>
+    <title>A Classification Approach to Predicting Healthy Recipes</title>
 
     <style>
         body {
@@ -19,7 +20,7 @@
             background: #1e1e1e;
             padding: 50px;
             border-radius: 12px;
-            box-shadow: 0px 8px 25px rgba(0,0,0,0.6);
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.6);
         }
 
         h1 {
@@ -47,6 +48,38 @@
             margin-bottom: 40px;
             color: #aaaaaa;
         }
+
+        .plot {
+            margin: 25px 0 35px 0;
+            text-align: center;
+        }
+
+        iframe {
+            width: 100%;
+            max-width: 950px;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+        }
+
+        ul {
+            padding-left: 25px;
+        }
+
+        .link {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .link a {
+            color: #4dd0e1;
+            text-decoration: none;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -54,52 +87,193 @@
 
     <div class="container">
 
-        <h1>DSC259R – BBH Horizon Lab</h1>
+        <h1>A Classification Approach to Predicting Healthy Recipes</h1>
         <div class="team">
-            <p>Recipe and Ratings: Predicting if a Recipe is Healthy</p>
             <p>Team Members: Hangyi Zhao, Bokyoung Son, Brandon Rocchio</p>
         </div>
 
-        <h2>Project Overview</h2>
+        <div class="link">
+            <p>
+                Website Link:
+                <a href="https://boson25.github.io/DSC259R_BBH-Horizon-Lab/" target="_blank">
+                    https://boson25.github.io/DSC259R_BBH-Horizon-Lab/
+                </a>
+            </p>
+        </div>
+
+        <h2>Introduction</h2>
         <p>
-            This project serves to see if we are able to utilize machine learning
-            techniques to predict the healthiness of a recipe given some basic information
-            about the recipe. 
+            In this project, we analyze a recipe dataset containing over 80,000 recipes, with
+            features such as tags, descriptions, cooking time, number of steps, number of ingredients,
+            and nutrition information. Our main question is whether we can predict if a recipe is healthy
+            using information available in the recipe itself.
         </p>
 
-        <h2>Research Question</h2>
+        <h2>Data Cleaning and Exploratory Data Analysis</h2>
         <p>
-            Can we accurately predict whether a recipe is healthy based on
-            different attributes such as calorie count, number of ingredients,
-            average ratings, etc. 
+            We define a recipe as <strong>healthy</strong> if it satisfies at least three out of four
+            median-based nutrition conditions: low calories, low sugar, low saturated fat, and high protein.
+            This creates a binary classification target, where 1 represents healthy and 0 represents unhealthy.
+        </p>
+        <p>
+            To avoid data leakage, the nutrition variables used to define the label are not used as model
+            features. Instead, we rely on recipe tags, description text, and basic recipe information such as
+            cooking time, number of steps, and number of ingredients. Because the dataset is imbalanced
+            (about 70% unhealthy and 30% healthy), we use ROC-AUC as our main evaluation metric.
         </p>
 
-        <h2>Hypothesis</h2>
+        <div class="plot">
+            <iframe src="assets/calories_dist.html"></iframe>
+        </div>
+
+        <div class="plot">
+            <iframe src="assets/rating_by_cooktime.html"></iframe>
+        </div>
+
+        <h2>Assessment of Missingness</h2>
         <p>
-            Placeholder
+            We examined missingness in the cleaned recipe dataset. The columns with missing values were
+            <strong>name</strong>, <strong>description</strong>, and <strong>avg_rating</strong>. We argue that
+            missingness in the <strong>description</strong> column is likely <strong>NMAR</strong>, since whether a
+            user writes a description may depend on the description itself. For example, simple or quickly submitted
+            recipes may be more likely to omit one.
+        </p>
+        <p>
+            We also tested whether missingness in <strong>avg_rating</strong> depends on observed variables.
+            A permutation test comparing recipes with and without ratings found a statistically significant difference
+            in cooking time, with an observed mean difference of 117.34 minutes and a p-value of 0.038. A second
+            permutation test showed an even stronger relationship with <strong>n_ingredients</strong>, with a p-value
+            close to 0.
+        </p>
+        <p>
+            These results suggest that missingness in <strong>avg_rating</strong> is at least partially
+            <strong>MAR</strong> with respect to cooking time and number of ingredients. In other words, simpler
+            and faster recipes are more likely to have missing ratings.
         </p>
 
-        <h2>Data</h2>
+        <div class="plot">
+            <iframe src="assets/permutation_minutes.html"></iframe>
+        </div>
+
+        <h2>Hypothesis Testing</h2>
         <p>
-            Placeholder
+            Our main hypothesis test asked whether average ratings differ between short recipes
+            (less than 30 minutes) and long recipes (more than 60 minutes). The null hypothesis stated
+            that there is no difference in average rating between the two groups, while the alternative
+            hypothesis stated that there is a difference.
+        </p>
+        <p>
+            The observed mean difference in average rating was <strong>0.0359</strong> points
+            (short minus long). Using a permutation test with 2,000 shuffles, we obtained a p-value below 0.0005.
+            Therefore, we reject the null hypothesis at the 0.05 significance level.
+        </p>
+        <p>
+            This suggests that short recipes tend to receive slightly higher ratings than long recipes.
+            However, the effect size is small, so while the relationship is statistically significant,
+            it is not necessarily large in practical terms. A second hypothesis test comparing low-ingredient
+            and high-ingredient recipes found no statistically significant difference in average rating.
         </p>
 
-        <h2>Methods</h2>
+        <div class="plot">
+            <iframe src="assets/hypothesis_test.html"></iframe>
+        </div>
+
+        <h2>Framing a Prediction Problem</h2>
         <p>
-            Placeholder
+            We frame this task as a <strong>binary classification problem</strong>: predict whether a recipe is healthy.
+            The response variable is <strong>is_healthy</strong>, which equals 1 if the recipe satisfies at least three
+            of the following four conditions: low calories, low sugar, low saturated fat, and high protein.
+        </p>
+        <p>
+            The features used for prediction include recipe tags, description text, cooking time, number of steps,
+            and number of ingredients. We intentionally exclude nutrition variables from the feature set because they
+            are already used to define the target label, and including them would create data leakage.
+        </p>
+        <p>
+            We evaluate our models using <strong>ROC-AUC</strong> because the dataset is imbalanced:
+            about 69.5% of recipes are labeled unhealthy and 30.5% are labeled healthy. ROC-AUC gives a better sense
+            of ranking performance than raw accuracy in this setting.
         </p>
 
-        <h2>Results</h2>
+        <h2>Baseline Model</h2>
         <p>
-            Placeholder
+            Our baseline model is a logistic regression classifier using only three numerical features:
+            <strong>n_steps</strong>, <strong>n_ingredients</strong>, and <strong>log_minutes</strong>.
+            This gives us a simple and interpretable starting point.
+        </p>
+        <p>
+            The baseline model achieved a <strong>ROC-AUC of 0.5844</strong>, only slightly above random guessing.
+            This shows that recipe complexity and cooking time alone are weak predictors of healthiness.
+            That makes sense intuitively, since a quick recipe is not always healthy, and a long recipe is not always
+            unhealthy.
+        </p>
+        <p>
+            We then explored stronger feature sets. Adding TF-IDF features from recipe tags increased performance
+            substantially to <strong>0.7542</strong>, and adding description text further increased performance to
+            <strong>0.7642</strong>. These improvements show that textual metadata contains much more signal than
+            simple structural recipe features.
         </p>
 
-        <h2>Conclusion</h2>
+        <h2>Final Model</h2>
         <p>
-            Placeholder
+            We compared several models on the richer feature set: logistic regression, random forest,
+            and gradient boosting. Their ROC-AUC scores were 0.7642, 0.7682, and 0.7689 respectively,
+            so Gradient Boosting performed best among the untuned models.
         </p>
+        <p>
+            We then built a final pipeline using:
+        </p>
+        <ul>
+            <li>Numerical features: <strong>n_steps</strong>, <strong>n_ingredients</strong>,
+                <strong>log_minutes</strong>, and <strong>n_steps_sq</strong>
+            </li>
+            <li>TF-IDF features from <strong>tags_str</strong></li>
+            <li>A <strong>GradientBoostingClassifier</strong> with hyperparameter tuning through GridSearchCV</li>
+        </ul>
+        <p>
+            GridSearchCV selected the best hyperparameters as:
+            <strong>learning_rate = 0.1</strong>,
+            <strong>max_depth = 5</strong>, and
+            <strong>n_estimators = 200</strong>.
+        </p>
+        <p>
+            The final tuned model achieved a <strong>test ROC-AUC of 0.7837</strong>, improving on the earlier
+            Gradient Boosting result of 0.7689. This improvement came from better feature engineering and model tuning.
+            In particular, health-related tags such as “healthy” and “low-fat” were highly informative, and the
+            squared steps feature helped capture non-linear complexity effects.
+        </p>
+        <p>
+            Overall accuracy increased to 0.75, although the model still performs better on unhealthy recipes
+            than healthy recipes. This is consistent with the class imbalance in the dataset.
+        </p>
+
+        <h2>Fairness Analysis</h2>
+        <p>
+            To assess fairness, we compared model performance across two recipe complexity groups:
+            <strong>simple recipes</strong> (number of ingredients less than or equal to the median) and
+            <strong>complex recipes</strong> (number of ingredients above the median).
+        </p>
+        <p>
+            Using the Gradient Boosting model, we found:
+        </p>
+        <ul>
+            <li><strong>AUC for simple recipes:</strong> 0.7660</li>
+            <li><strong>AUC for complex recipes:</strong> 0.7653</li>
+            <li><strong>Observed AUC difference:</strong> 0.0007</li>
+        </ul>
+        <p>
+            We then ran a permutation test to determine whether this difference could be due to chance.
+            The resulting p-value was <strong>0.9380</strong>, which is much greater than 0.05. Therefore,
+            we fail to reject the null hypothesis that the model performs equally well across the two groups.
+        </p>
+        <p>
+            This suggests that our final model does not show meaningful performance disparities between simple
+            and complex recipes.
+        </p>
+
 
     </div>
 
 </body>
+
 </html>
