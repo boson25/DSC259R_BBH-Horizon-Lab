@@ -19,25 +19,25 @@ The full project website is hoted from this repo at: https://boson25.github.io/D
 
  # Workflow
  1. Data cleaning
-    -Remove invalid data
-    -Process missing data
-    -Generating our "healthiness" variable
+    - Remove invalid data
+    - Process missing data
+    - Generating our "healthiness" variable
 2. EDA
-   -Univariate distributions
-   -Bivariate analysis
-   -Aggregations across recipe tags
+   - Univariate distributions
+   - Bivariate analysis
+   - Aggregations across recipe tags
 3. Missingness Question
-   -Investigate missing values in the data
-   -Conduct permutation test to determine the missingness mechanism
+   - Investigate missing values in the data
+   - Conduct permutation test to determine the missingness mechanism
 4. Hypothesis testing
-   -Permutation test to determine whether short recipes and long recipes differ in average rating. (Null: There is no difference in average rating between short recipes <30 min and long recipes >60 min. Alternative: There is a meaningful difference in average rating between short and long recipes.)
-   -Permutation test to determine whether low ingredient recipes and high ingredient recipes differ in average rating. (Null: There is no difference in average rating between low ingredient recipes and high ingredient recipes. Alternative: There is a significant difference in average rating between low ingredient recipes and high ingredient recipes.)
+   - Permutation test to determine whether short recipes and long recipes differ in average rating. (Null: There is no difference in average rating between short recipes <30 min and long recipes >60 min. Alternative: There is a meaningful difference in average rating between short and long recipes.)
+   - Permutation test to determine whether low ingredient recipes and high ingredient recipes differ in average rating. (Null: There is no difference in average rating between low ingredient recipes and high ingredient recipes. Alternative: There is a significant difference in average rating between low ingredient recipes and high ingredient recipes.)
 5. Prediction Models
-   -Train different models for binary classification of healthiness (if a recipe meets 3 or more of the nutrition conditions we set).
-   -Baseline
-     -Logistic regression using n_steps, n_ingredients, and log_minutes.
-   -Final model
-     -Tested logistic regression, random forect, and gradient boosting
-     -Gradient boosting performed the best using n_steps_sq to capture non-linear complexity.
+   - Train different models for binary classification of healthiness (if a recipe meets 3 or more of the nutrition conditions we set).
+   - Baseline
+     - Logistic regression using n_steps, n_ingredients, and log_minutes.
+   - Final model
+     - Tested logistic regression, random forect, and gradient boosting
+     - Gradient boosting performed the best using n_steps_sq to capture non-linear complexity.
 6. Fairness Analysis
-   -Permutation test to determine if the AUC difference could be due to chance. 
+   - Permutation test to determine if the AUC difference could be due to chance. 
