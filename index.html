@@ -1,105 +1,505 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>DSC259R BBH Horizon Lab: Recipe and Ratings</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Classification Approach to Predicting Healthy Recipes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #F5F0E8;
+      --bg2:       #EDE7DA;
+      --bg3:       #E4DDD0;
+      --surface:   #FDFAF5;
+      --border:    rgba(80, 60, 30, 0.12);
+      --border-md: rgba(80, 60, 30, 0.22);
+      --forest:    #2D5016;
+      --forest-md: #3D6B1F;
+      --forest-lt: #EDF2E6;
+      --forest-btn:#4A7C28;
+      --rust:      #A84B1F;
+      --rust-lt:   #F5EAE4;
+      --rust-md:   #C45D2E;
+      --sand:      #C4A265;
+      --sand-lt:   #F7F0E3;
+      --sand-dk:   #8B6E3A;
+      --bark:      #5C3D1E;
+      --bark-lt:   #EEE5D8;
+      --text:      #2A1F0E;
+      --text-md:   #5C4A2A;
+      --text-muted:#8C7A5A;
+      --moss:      #6B8F3E;
+      --moss-lt:   #EFF4E7;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Instrument Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 0;
-        }
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 58px;
+      background: rgba(245, 240, 232, 0.93);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-wordmark { display: flex; align-items: center; gap: 10px; }
+    .nav-leaf { width: 20px; height: 20px; }
+    .nav-title { font-family: 'Playfair Display', Georgia, serif; font-size: 14px; font-weight: 600; color: var(--forest); }
+    .nav-links { display: flex; gap: 2px; list-style: none; }
+    .nav-links a { font-size: 12px; font-weight: 500; color: var(--text-md); text-decoration: none; padding: 5px 11px; border-radius: 6px; transition: background .18s, color .18s; }
+    .nav-links a:hover { color: var(--forest); background: var(--forest-lt); }
 
-        .container {
-            width: 70%;
-            margin: 80px auto;
-            background: #1e1e1e;
-            padding: 50px;
-            border-radius: 12px;
-            box-shadow: 0px 8px 25px rgba(0,0,0,0.6);
-        }
+    /* HERO */
+    .hero { position: relative; min-height: 92vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 100px 48px 80px; overflow: hidden; }
 
-        h1 {
-            text-align: center;
-            font-size: 42px;
-            color: #00bcd4;
-            margin-bottom: 10px;
-        }
+    .hero-inner { position: relative; z-index: 1; max-width: 780px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--moss); background: var(--moss-lt); border: 1px solid rgba(107,143,62,.3); padding: 5px 14px; border-radius: 100px; margin-bottom: 28px; animation: riseIn .7s ease both; }
+    .eyebrow::before { content: ''; width: 6px; height: 6px; background: var(--moss); border-radius: 50%; }
+    .hero h1 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(34px,5.5vw,68px); font-weight: 700; line-height: 1.08; letter-spacing: -.02em; animation: riseIn .7s ease .1s both; }
+    .hero h1 em { font-style: italic; color: var(--forest); }
+    .hero-sub { margin: 22px auto 0; font-size: 17px; color: var(--text-md); line-height: 1.7; max-width: 560px; animation: riseIn .7s ease .2s both; }
+    .team-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 30px; animation: riseIn .7s ease .4s both; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--bg); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0; }
+    .av1 { background: var(--forest); } .av2 { background: var(--rust); } .av3 { background: var(--sand-dk); }
+    .team-names { font-size: 13px; color: var(--text-muted); margin-left: 4px; }
+    .scroll-cue { position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; animation: riseIn .8s ease .8s both; }
+    .scroll-stem { width: 1px; height: 36px; background: linear-gradient(to bottom, var(--moss), transparent); animation: stemPulse 2s ease infinite; }
+    @keyframes stemPulse { 0%,100%{opacity:1;transform:scaleY(1)} 50%{opacity:.4;transform:scaleY(.7)} }
+    @keyframes riseIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
-        h2 {
-            margin-top: 40px;
-            color: #00bcd4;
-            border-bottom: 2px solid #333;
-            padding-bottom: 8px;
-        }
+    /* METRICS STRIP */
+    .metrics { display: grid; grid-template-columns: repeat(4,1fr); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); }
+    .metric { padding: 28px 36px; border-right: 1px solid var(--border); transition: background .2s; }
+    .metric:last-child { border-right: none; }
+    .metric:hover { background: var(--bg2); }
+    .metric-val { font-family: 'Playfair Display', Georgia, serif; font-size: 34px; font-weight: 700; line-height: 1; }
+    .metric-label { margin-top: 5px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .mv-forest{color:var(--forest)} .mv-rust{color:var(--rust)} .mv-sand{color:var(--sand-dk)} .mv-moss{color:var(--moss)}
 
-        p {
-            font-size: 18px;
-            line-height: 1.6;
-            color: #cccccc;
-        }
+    /* MAIN */
+    main { max-width: 1080px; margin: 0 auto; padding: 0 48px 120px; }
 
-        .team {
-            text-align: center;
-            margin-bottom: 40px;
-            color: #aaaaaa;
-        }
-    </style>
+    /* SECTION */
+    .section { margin-top: 96px; opacity: 0; transform: translateY(24px); transition: opacity .65s ease, transform .65s ease; }
+    .section.visible { opacity: 1; transform: translateY(0); }
+    .section-header { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 28px; }
+    .s-num { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-top: 7px; flex-shrink: 0; width: 26px; }
+    .s-title-wrap { flex: 1; }
+    .s-rule { width: 28px; height: 3px; border-radius: 2px; margin-bottom: 9px; }
+    .section h2 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(24px,3vw,34px); font-weight: 700; line-height: 1.2; letter-spacing: -.01em; color: var(--text); }
+
+    /* CARD */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px 32px; margin-bottom: 20px; }
+    .card p { font-size: 16px; line-height: 1.78; color: var(--text-md); }
+    .card p + p { margin-top: 14px; }
+    .card strong { color: var(--text); font-weight: 600; }
+    .card ul { list-style: none; padding: 0; margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .card ul li { display: flex; align-items: flex-start; gap: 10px; font-size: 15px; color: var(--text-md); line-height: 1.65; }
+    .card ul li::before { content: '↳'; color: var(--forest-btn); flex-shrink: 0; font-size: 13px; margin-top: 2px; }
+
+    /* PILLS */
+    .pill-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 500; border: 1px solid; }
+    .pill-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .pill-forest{color:var(--forest);background:var(--forest-lt);border-color:rgba(45,80,22,.2)}
+    .pill-rust{color:var(--rust);background:var(--rust-lt);border-color:rgba(168,75,31,.2)}
+    .pill-sand{color:var(--sand-dk);background:var(--sand-lt);border-color:rgba(196,162,101,.3)}
+    .pill-bark{color:var(--bark);background:var(--bark-lt);border-color:rgba(92,61,30,.2)}
+
+    /* HYPOTHESIS */
+    .hyp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .hyp-card { padding: 20px 22px; border-radius: 12px; border-left: 3px solid; }
+    .hyp-null { background: var(--bg2); border-color: var(--text-muted); }
+    .hyp-alt { background: var(--forest-lt); border-color: var(--forest); }
+    .hyp-label { font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 8px; }
+    .hyp-null .hyp-label{color:var(--text-muted)} .hyp-alt .hyp-label{color:var(--forest)}
+    .hyp-card p { font-size: 14px; color: var(--text-md); line-height: 1.65; }
+
+    /* RESULT BANNER */
+    .result-banner { display: flex; align-items: center; gap: 20px; padding: 20px 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; flex-wrap: wrap; margin-top: 18px; }
+    .r-metric { display: flex; flex-direction: column; gap: 2px; }
+    .r-val { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-weight: 700; }
+    .r-key { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); font-weight: 500; }
+    .r-sep { width: 1px; height: 38px; background: var(--border-md); flex-shrink: 0; }
+
+    /* MODEL BARS */
+    .sc-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .sc-table thead th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); padding: 0 14px 10px; text-align: left; border-bottom: 1px solid var(--border-md); }
+    .sc-table thead th:not(:first-child) { text-align: right; }
+    .sc-table tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    .sc-table tbody tr:last-child { border-bottom: none; }
+    .sc-table tbody tr:hover { background: var(--bg2); }
+    .sc-table tbody tr.sc-best { background: var(--forest-lt); }
+    .sc-table tbody tr.sc-best:hover { background: #e2ecda; }
+    .sc-table td { padding: 13px 14px; vertical-align: middle; }
+    .sc-table td:not(:first-child) { text-align: right; }
+    .sc-model { font-weight: 600; font-size: 14px; color: var(--text); display: block; }
+    .sc-stage { font-size: 12px; color: var(--text-muted); margin-top: 2px; display: block; }
+    .sc-feat { font-size: 13px; color: var(--text-muted); }
+    .sc-auc { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 15px; color: var(--text); }
+    .sc-best .sc-auc { color: var(--forest); }
+    .sc-delta-pos { font-size: 13px; color: var(--forest-md); }
+    .sc-delta-base { font-size: 13px; color: var(--text-muted); }
+    .sc-badge { display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; background: var(--forest-lt); color: var(--forest); border: 0.5px solid #a8c98a; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+    .fair-callout { display: grid; grid-template-columns: repeat(3,1fr); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 18px; }
+    .fair-cell { padding: 20px 24px; border-right: 1px solid var(--border); background: var(--surface); }
+    .fair-cell:last-child { border-right: none; }
+    .fair-key { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: 8px; }
+    .fair-num { font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; }
+    .fair-sub { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+    .fair-verdict { font-size: 12px; color: var(--forest); font-weight: 600; margin-top: 5px; }
+
+    /* FAIRNESS */
+
+
+    /* CHARTS */
+    .chart-block { margin-top: 28px; }
+    .chart-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .11em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .chart-eyebrow::before { content:''; display:inline-block; width:18px; height:2px; background:var(--sand); border-radius:1px; }
+    .chart-shell { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); background: #fff; box-shadow: 0 4px 24px rgba(60,40,10,.07), 0 1px 4px rgba(60,40,10,.04); }
+    iframe { width: 100%; height: 510px; border: none; display: block; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 36px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: var(--surface); }
+    footer p { font-size: 13px; color: var(--text-muted); }
+    footer a { font-size: 13px; color: var(--forest); text-decoration: none; font-weight: 500; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .metrics { grid-template-columns: repeat(2,1fr); }
+      main { padding: 0 20px 80px; }
+      .hyp-grid { grid-template-columns: 1fr; }
+      .fair-callout { grid-template-columns: 1fr; }
+      .sc-table td:nth-child(2) { display: none; }
+      .sc-table th:nth-child(2) { display: none; }
+      footer { padding: 24px 20px; }
+    }
+  </style>
 </head>
-
 <body>
 
-    <div class="container">
+<nav>
+  <div class="nav-wordmark">
+    <svg class="nav-leaf" viewBox="0 0 24 24" fill="none">
+      <path d="M12 22C12 22 3 16.5 3 9.5C3 5.91 5.91 3 9.5 3C10.74 3 11.9 3.36 12.87 4C13.84 3.36 15 3 16.5 3C20.09 3 23 5.91 23 9.5C23 16.5 14 22 12 22Z" stroke="var(--forest)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12 22V9" stroke="var(--forest)" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span class="nav-title">Healthy Recipes · DSC 259R</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#eda">EDA</a></li>
+    <li><a href="#missingness">Missingness</a></li>
+    <li><a href="#hypothesis">Hypothesis</a></li>
+    <li><a href="#framing">Framing</a></li>
+    <li><a href="#baseline">Baseline</a></li>
+    <li><a href="#final">Final Model</a></li>
+    <li><a href="#fairness">Fairness</a></li>
+  </ul>
+</nav>
 
-        <h1>DSC259R – BBH Horizon Lab</h1>
-        <div class="team">
-            <p>Recipe and Ratings: Predicting if a Recipe is Healthy</p>
-            <p>Team Members: Hangyi Zhao, Bokyoung Son, Brandon Rocchio</p>
-        </div>
+<section class="hero">
 
-        <h2>Project Overview</h2>
-        <p>
-            This project serves to see if we are able to utilize machine learning
-            techniques to predict the healthiness of a recipe given some basic information
-            about the recipe. 
-        </p>
+  <div class="hero-inner">
+    <div class="eyebrow">DSC 259R · Final Project · BBH-Horizon-Lab</div>
+    <h1>A <em>Classification</em> Approach<br>to Predicting Healthy Recipes</h1>
+    <p class="hero-sub">Can we tell if a recipe is healthy from its tags, description, and structure alone — without ever reading the nutrition label?</p>
 
-        <h2>Research Question</h2>
-        <p>
-            Can we accurately predict whether a recipe is healthy based on
-            different attributes such as calorie count, number of ingredients,
-            average ratings, etc. 
-        </p>
+    <div class="team-row">
+      <div class="avatar av2">BS</div>
+      <div class="avatar av1">HZ</div>
+      <div class="avatar av3">BR</div>
+      <span class="team-names">Bokyoung Son · Hangyi Zhao · Brandon Rocchio</span>
+    </div>
+  </div>
+  <div class="scroll-cue">
+    <div class="scroll-stem"></div>
+    Scroll
+  </div>
+</section>
 
-        <h2>Hypothesis</h2>
-        <p>
-            Placeholder
-        </p>
+<div class="metrics">
+  <div class="metric"><div class="metric-val mv-forest">80K+</div><div class="metric-label">Recipes analyzed</div></div>
+  <div class="metric"><div class="metric-val mv-rust">0.7837</div><div class="metric-label">Final ROC-AUC</div></div>
+  <div class="metric"><div class="metric-val mv-sand">30.5%</div><div class="metric-label">Healthy recipe share</div></div>
+  <div class="metric"><div class="metric-val mv-moss">0.75</div><div class="metric-label">Overall accuracy</div></div>
+</div>
 
-        <h2>Data</h2>
-        <p>
-            Placeholder
-        </p>
+<main>
 
-        <h2>Methods</h2>
-        <p>
-            Placeholder
-        </p>
+  <section class="section" id="intro">
+    <div class="section-header">
+      <div class="s-num">01</div>
+      <div class="s-title-wrap">
+        <div class="s-rule" style="background:var(--forest)"></div>
+        <h2>Introduction</h2>
+      </div>
+    </div>
+    <div class="card">
+      <p>In this project, we analyze a recipe dataset containing over <strong>80,000 recipes</strong>, with features such as tags, descriptions, cooking time, number of steps, number of ingredients, and nutrition information. Our central question: can we predict whether a recipe is <strong>healthy</strong> using only the recipe's metadata — without peeking at nutrition data?</p>
+    </div>
+    <div class="pill-row">
+      <div class="pill pill-forest"><div class="pill-dot" style="background:var(--forest)"></div>Tags &amp; descriptions as signal</div>
+      <div class="pill pill-rust"><div class="pill-dot" style="background:var(--rust)"></div>Binary classification task</div>
+      <div class="pill pill-sand"><div class="pill-dot" style="background:var(--sand-dk)"></div>No nutrition data leakage</div>
+      <div class="pill pill-bark"><div class="pill-dot" style="background:var(--bark)"></div>ROC-AUC as primary metric</div>
+    </div>
+  </section>
 
-        <h2>Results</h2>
-        <p>
-            Placeholder
-        </p>
+  <section class="section" id="eda">
+    <div class="section-header">
+      <div class="s-num">02</div>
+      <div class="s-title-wrap">
+        <div class="s-rule" style="background:var(--rust)"></div>
+        <h2>Data Cleaning &amp; EDA</h2>
+      </div>
+    </div>
+    <div class="card">
+      <p>We define a recipe as <strong>healthy</strong> if it satisfies at least three of four median-based nutrition conditions: low calories, low sugar, low saturated fat, and high protein. This creates a binary target where 1 = healthy and 0 = unhealthy.</p>
+      <p>Nutrition variables used to define the label are <strong>excluded</strong> from model features to prevent data leakage. We rely instead on recipe tags, description text, cooking time, number of steps, and number of ingredients. The dataset is imbalanced (~70% unhealthy, ~30% healthy), so we use <strong>ROC-AUC</strong> as our primary evaluation metric.</p>
+    </div>
+    <div class="chart-block">
+      <div class="chart-eyebrow">Calorie distribution</div>
+      <div class="chart-shell"><iframe src="assets/calories_dist.html" title="Calorie distribution"></iframe></div>
+    </div>
+    <div class="chart-block">
+      <div class="chart-eyebrow">Average rating by cooking time</div>
+      <div class="chart-shell"><iframe src="assets/rating_by_cooktime.html" title="Rating by cooking time"></iframe></div>
+    </div>
+  </section>
 
-        <h2>Conclusion</h2>
-        <p>
-            Placeholder
-        </p>
+  <section class="section" id="missingness">
+    <div class="section-header">
+      <div class="s-num">03</div>
+      <div class="s-title-wrap">
+        <div class="s-rule" style="background:var(--sand)"></div>
+        <h2>Assessment of Missingness</h2>
+      </div>
+    </div>
+    <div class="card">
+      <p>Columns with missing values in the cleaned dataset: <strong>name</strong>, <strong>description</strong>, and <strong>avg_rating</strong>. We argue that missingness in <strong>description</strong> is likely <strong>NMAR</strong> — whether a user writes one may depend on the content itself. Simple, quickly-submitted recipes are more likely to omit a description.</p>
+      <p>A permutation test showed avg_rating missingness is significantly related to cooking time (observed mean diff: 117.34 min, p = 0.038) and even more strongly to <strong>n_ingredients</strong> (p ≈ 0). This suggests avg_rating missingness is at least partially <strong>MAR</strong> — simpler, faster recipes are more likely to have missing ratings.</p>
+    </div>
+    <div class="chart-block">
+      <div class="chart-eyebrow">Permutation test — missingness vs. cooking time</div>
+      <div class="chart-shell"><iframe src="assets/permutation_minutes.html" title="Permutation test missingness"></iframe></div>
+    </div>
+  </section>
 
+  <section class="section" id="hypothesis">
+    <div class="section-header">
+      <div class="s-num">04</div>
+      <div class="s-title-wrap">
+        <div class="s-rule" style="background:var(--moss)"></div>
+        <h2>Hypothesis Testing</h2>
+      </div>
+    </div>
+    <div class="hyp-grid">
+      <div class="hyp-card hyp-null">
+        <div class="hyp-label">H₀ — Null Hypothesis</div>
+        <p>There is no difference in average rating between short recipes (&lt;30 min) and long recipes (&gt;60 min).</p>
+      </div>
+      <div class="hyp-card hyp-alt">
+        <div class="hyp-label">H₁ — Alternative Hypothesis</div>
+        <p>There is a meaningful difference in average rating between short and long recipes.</p>
+      </div>
+    </div>
+    <div class="card">
+      <p>Using a permutation test with 2,000 shuffles, we found an observed mean difference of <strong>0.0359</strong> points (short minus long) and a p-value below <strong>0.0005</strong>. We reject H₀ at the 0.05 significance level — short recipes tend to receive slightly higher ratings.</p>
+      <p>The effect size is small: statistically significant but not large in practical terms. A second test comparing low- vs. high-ingredient recipes found <strong>no significant difference</strong> in average rating.</p>
+    </div>
+    <div class="result-banner">
+      <div class="r-metric"><div class="r-val mv-moss">0.0359</div><div class="r-key">Observed mean diff.</div></div>
+      <div class="r-sep"></div>
+      <div class="r-metric"><div class="r-val mv-forest">&lt;0.0005</div><div class="r-key">p-value (2,000 shuffles)</div></div>
+      <div class="r-sep"></div>
+      <div class="r-metric"><div class="r-val mv-rust">Reject H₀</div><div class="r-key">Decision at α = 0.05</div></div>
+    </div>
+    <div class="chart-block">
+      <div class="chart-eyebrow">Permutation test distribution — hypothesis 1</div>
+      <div class="chart-shell"><iframe src="assets/hypothesis_test.html" title="Hypothesis test results"></iframe></div>
     </div>
 
+    <div style="margin-top:40px; width:28px; height:3px; border-radius:2px; background:var(--bark); margin-bottom:28px;"></div>
+
+    <div class="hyp-grid">
+      <div class="hyp-card hyp-null">
+        <div class="hyp-label">H₀ — Null Hypothesis</div>
+        <p>The number of ingredients is not associated with average rating. Any observed difference is due to random chance.</p>
+      </div>
+      <div class="hyp-card hyp-alt">
+        <div class="hyp-label">H₁ — Alternative Hypothesis</div>
+        <p>The number of ingredients is associated with average rating.</p>
+      </div>
+    </div>
+    <div class="card">
+      <p>We split recipes into low-ingredient (≤ median) and high-ingredient (&gt; median) groups and ran a permutation test with 2,000 shuffles. The observed mean difference was <strong>0.004</strong> points (low minus high) with a p-value of <strong>0.407</strong>.</p>
+      <p>Since p &gt; 0.05, we <strong>fail to reject H₀</strong> — there is no statistically significant evidence that the number of ingredients is related to average rating.</p>
+    </div>
+    <div class="result-banner">
+      <div class="r-metric"><div class="r-val mv-sand">0.004</div><div class="r-key">Observed mean diff.</div></div>
+      <div class="r-sep"></div>
+      <div class="r-metric"><div class="r-val mv-rust">0.407</div><div class="r-key">p-value (2,000 shuffles)</div></div>
+      <div class="r-sep"></div>
+      <div class="r-metric"><div class="r-val mv-moss">Fail to reject H₀</div><div class="r-key">Decision at α = 0.05</div></div>
+    </div>
+    <div class="chart-block">
+      <div class="chart-eyebrow">Permutation test distribution — hypothesis 2</div>
+      <div class="chart-shell"><iframe src="assets/hypothesis_test2.html" title="Hypothesis 2 test results"></iframe></div>
+    </div>
+  </section>
+
+  <section class="section" id="framing">
+    <div class="section-header">
+      <div class="s-num">05</div>
+      <div class="s-title-wrap">
+        <div class="s-rule" style="background:var(--bark)"></div>
+        <h2>Framing the Prediction Problem</h2>
+      </div>
+    </div>
+    <div class="card">
+      <p>We frame this as a <strong>binary classification problem</strong>: predict whether a recipe is healthy (is_healthy = 1 if ≥ 3 of 4 nutrition conditions are met). We evaluate with <strong>ROC-AUC</strong> to account for class imbalance (~69.5% unhealthy, ~30.5% healthy).</p>
+      <p>Features used — selected carefully to avoid data leakage:</p>
+      <ul>
+        <li><strong>Tags</strong> — TF-IDF encoded tag strings (health-related tags like "healthy" and "low-fat" are highly informative)</li>
+        <li><strong>Description text</strong> — TF-IDF encoded free-text description</li>
+        <li><strong>Structural features</strong> — cooking time (log-transformed), number of steps, number of ingredients</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="baseline">
+    <div class="section-header">
+      <div class="s-num">06</div>
+      <div class="s-title-wrap">
+        <div class="s-rule" style="background:var(--rust)"></div>
+        <h2>Baseline Model</h2>
+      </div>
+    </div>
+    <div class="card">
+      <p>Our baseline is a <strong>logistic regression</strong> using only n_steps, n_ingredients, and log_minutes. At ROC-AUC <strong>0.5844</strong> — barely above chance — structure alone is a weak predictor. Adding TF-IDF tags jumped performance to <strong>0.7542</strong>; adding description text raised it to <strong>0.7642</strong>. Textual metadata carries far more signal.</p>
+    </div>
+    <table class="sc-table">
+      <thead><tr><th>Model</th><th>Features</th><th>ROC-AUC</th><th>vs. baseline</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="sc-model">Logistic regression</span><span class="sc-stage">Baseline</span></td>
+          <td><span class="sc-feat">n_steps, n_ingredients, log_minutes</span></td>
+          <td><span class="sc-auc">0.584</span></td>
+          <td><span class="sc-delta-base">—</span></td>
+        </tr>
+        <tr>
+          <td><span class="sc-model">Logistic regression</span><span class="sc-stage">+ tags TF-IDF</span></td>
+          <td><span class="sc-feat">Numeric + tag text</span></td>
+          <td><span class="sc-auc">0.754</span></td>
+          <td><span class="sc-delta-pos">+0.170</span></td>
+        </tr>
+        <tr>
+          <td><span class="sc-model">Logistic regression</span><span class="sc-stage">+ description TF-IDF</span></td>
+          <td><span class="sc-feat">Numeric + tags + description</span></td>
+          <td><span class="sc-auc">0.764</span></td>
+          <td><span class="sc-delta-pos">+0.180</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="final">
+    <div class="section-header">
+      <div class="s-num">07</div>
+      <div class="s-title-wrap">
+        <div class="s-rule" style="background:var(--forest)"></div>
+        <h2>Final Model</h2>
+      </div>
+    </div>
+    <div class="card">
+      <p>Comparing logistic regression (0.764), random forest (0.768), and gradient boosting (0.769) on the full feature set, Gradient Boosting came out on top. Our final pipeline adds <strong>n_steps_sq</strong> (squared steps captures non-linear complexity) and tunes via <strong>GridSearchCV</strong>: learning_rate = 0.1, max_depth = 5, n_estimators = 200.</p>
+    </div>
+    <table class="sc-table">
+      <thead><tr><th>Model</th><th>Features</th><th>ROC-AUC</th><th>vs. baseline</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="sc-model">Logistic regression</span><span class="sc-stage">Full features</span></td>
+          <td><span class="sc-feat">Numeric + tags + description</span></td>
+          <td><span class="sc-auc">0.764</span></td>
+          <td><span class="sc-delta-pos">+0.180</span></td>
+        </tr>
+        <tr>
+          <td><span class="sc-model">Random forest</span><span class="sc-stage">Full features</span></td>
+          <td><span class="sc-feat">Numeric + tags + description</span></td>
+          <td><span class="sc-auc">0.768</span></td>
+          <td><span class="sc-delta-pos">+0.184</span></td>
+        </tr>
+        <tr>
+          <td><span class="sc-model">Gradient boosting</span><span class="sc-stage">Untuned</span></td>
+          <td><span class="sc-feat">Numeric + tags + description</span></td>
+          <td><span class="sc-auc">0.769</span></td>
+          <td><span class="sc-delta-pos">+0.185</span></td>
+        </tr>
+        <tr class="sc-best">
+          <td><span class="sc-model">Gradient boosting <span class="sc-badge">Best</span></span><span class="sc-stage">GridSearchCV tuned</span></td>
+          <td><span class="sc-feat" style="color:var(--forest-md)">+ n_steps_sq · lr=0.1 · depth=5 · n_est=200</span></td>
+          <td><span class="sc-auc">0.784</span></td>
+          <td><span class="sc-delta-pos">+0.200</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="result-banner">
+      <div class="r-metric"><div class="r-val mv-forest">0.7837</div><div class="r-key">Final test ROC-AUC</div></div>
+      <div class="r-sep"></div>
+      <div class="r-metric"><div class="r-val mv-sand">0.75</div><div class="r-key">Overall accuracy</div></div>
+      <div class="r-sep"></div>
+      <div class="r-metric"><div class="r-val mv-rust">+0.015</div><div class="r-key">AUC gain from tuning</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="fairness">
+    <div class="section-header">
+      <div class="s-num">08</div>
+      <div class="s-title-wrap">
+        <div class="s-rule" style="background:var(--moss)"></div>
+        <h2>Fairness Analysis</h2>
+      </div>
+    </div>
+    <div class="card">
+      <p>We compared model performance between <strong>simple recipes</strong> (n_ingredients ≤ median) and <strong>complex recipes</strong> (n_ingredients &gt; median). A permutation test assessed whether the observed AUC difference could be due to chance.</p>
+    </div>
+    <div class="fair-callout">
+      <div class="fair-cell">
+        <div class="fair-key">Simple recipes AUC</div>
+        <div class="fair-num">0.766</div>
+        <div class="fair-sub">n_ingredients ≤ median</div>
+      </div>
+      <div class="fair-cell">
+        <div class="fair-key">Complex recipes AUC</div>
+        <div class="fair-num">0.765</div>
+        <div class="fair-sub">n_ingredients &gt; median</div>
+      </div>
+      <div class="fair-cell">
+        <div class="fair-key">p-value</div>
+        <div class="fair-num">0.938</div>
+        <div class="fair-verdict">Fail to reject H₀</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <p>With a p-value of <strong>0.9380</strong> — far above 0.05 — we <strong>fail to reject</strong> the null hypothesis that performance is equal across groups. Our final model does not show meaningful disparities between simple and complex recipes.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>DSC 259R · BBH-Horizon-Lab · Bokyoung Son · Hangyi Zhao · Brandon Rocchio</p>
+  <a href="https://boson25.github.io/DSC259R_BBH-Horizon-Lab/" target="_blank">↗ boson25.github.io/DSC259R_BBH-Horizon-Lab</a>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting) x.target.classList.add('visible'); }), {threshold:.08});
+  document.querySelectorAll('.section').forEach(s => obs.observe(s));
+</script>
 </body>
 </html>
