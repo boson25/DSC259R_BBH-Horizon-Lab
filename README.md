@@ -3,12 +3,12 @@
 
 The goal of this project is to analyze a large recipe dataset and build a predictive model to determine whether a recipe is healthy or unhealthy based on its features.
 
-The project inclued data cleaning, EDA, hypothesis testing, predictive modeling, and fairness analysis. 
+The project included data cleaning, EDA, hypothesis testing, predictive modeling, and fairness analysis. 
 
 ---
 
 # Project Website
-The full project website is hoted from this repo at: https://boson25.github.io/DSC259R_BBH-Horizon-Lab/#intro
+The full project website is hosted from this repo at: https://boson25.github.io/DSC259R_BBH-Horizon-Lab/#intro
 
  The website contains our data cleaning and pre-processing, EDA, missingness analysis, hypothesis testing, predictive modeling, fairness analysis, as well as our visualizations and results
 
@@ -36,8 +36,13 @@ The full project website is hoted from this repo at: https://boson25.github.io/D
    - Train different models for binary classification of healthiness (if a recipe meets 3 or more of the nutrition conditions we set).
    - Baseline
      - Logistic regression using n_steps, n_ingredients, and log_minutes.
+   - Improving the baseline
+     - Added TF-IDF features from recipe tags, which significantly improved performance.
+     - Further added TF-IDF features from recipe descriptions for additional signal.
    - Final model
-     - Tested logistic regression, random forect, and gradient boosting
+     - Tested logistic regression, random forest, and gradient boosting
      - Gradient boosting performed the best using n_steps_sq to capture non-linear complexity.
+     - Added n_steps_sq as an engineered feature to capture non-linear complexity effects.
 6. Fairness Analysis
-   - Permutation test to determine if the AUC difference could be due to chance. 
+     - Compared model performance between simple recipes (n_ingredients ≤ median) and complex recipes (n_ingredients > median).
+     - - A permutation test found no significant difference in AUC between the two groups, suggesting the model performs equitably across recipe complexity levels.
