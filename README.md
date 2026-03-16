@@ -42,7 +42,6 @@ The full project website is hosted from this repo at: https://boson25.github.io/
    - Final model
      - Tested logistic regression, random forest, and gradient boosting
      - Gradient boosting performed the best using n_steps_sq to capture non-linear complexity.
-     - Added n_steps_sq as an engineered feature to capture non-linear complexity effects.
 6. Fairness Analysis
      - Compared model performance between simple recipes (n_ingredients ≤ median) and complex recipes (n_ingredients > median).
      - A permutation test found no significant difference in AUC between the two groups, suggesting the model performs equitably across recipe complexity levels.
